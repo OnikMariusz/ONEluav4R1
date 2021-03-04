@@ -72,7 +72,7 @@ end
 
 
 function containsBlock(x,y) 
-    return (map[math.floor(y)][math.floor(x)] ~= -1); 
+    return (map[math.floor(y+1)][math.floor(x+1)] ~= -1); 
 end
 
 minimapF = function()
