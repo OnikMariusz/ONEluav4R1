@@ -115,46 +115,46 @@ raycasterF = function()
     local angleBetweenRays = 0.2 * math.pi /180;
     
     r.castRays = function() 
-        for  i=1, numberOfRays, 1 do
+        for  i=1, numberOfRays-1, 1 do
             local rayNumber = -numberOfRays/2 + i;
             local rayAngle = angleBetweenRays * rayNumber + player.angle;
-            p.castRay(rayAngle);
+            r.castRay(rayAngle);
         end
     end
       
     r.castRay = function(rayAngle)
-        local woPi = math.pi * 2; 
-        rayAngle = rayAngle % twoPi;
-        if rayAngle < 0 then  rayAngle = rayAngle +  twoPi;
-        local right = (rayAngle > twoPi * 0.75 or rayAngle < twoPi * 0.25);
-        local up = rayAngle > math.pi;
+        local twoPi = math.pi * 2
+        rayAngle = rayAngle % twoPi
+        if rayAngle < 0 then  rayAngle = rayAngle +  twoPi end
+        local right = (rayAngle > twoPi * 0.75 or rayAngle < twoPi * 0.25)
+        local up = rayAngle > math.pi
 
-        local slope = math.tan(rayAngle);
-        local distance = 0;
+        local slope = math.tan(rayAngle)
+        local distance = 0
         local xHit = 0;
         local yHit = 0;
-        local wallX;  
-        local wallY;
+        local wallX 
+        local wallY
         -- equivalent to var = cond ? a : b; var = cond and a or b ?: - https://pl.qaz.wiki/wiki/%3F:#Lua
-        local dX = right and 1 or -1; 
-        local dY = dX * slope;  
+        local dX = right and 1 or -1
+        local dY = dX * slope  
         local x = right and  math.ceil(player.x) or math.floor(player.x)
-        local y = player.y + (x - player.x) * slope; 
+        local y = player.y + (x - player.x) * slope 
         
         while  x >= 0 and  x < minimap.cellsAcross and y >= 0 and y < minimap.cellsDown do
             local rr = right and 0 or -1
-            wallX = math.floor(x + rr);
-            wallY = Math.floor(y);
-                if map[wallY+1][wallX+1] > -1 
-                    local distanceX = x - player.x;
-                    local distanceY = y - player.y;
-                    distance = math.sqrt(distanceX*distanceX + distanceY*distanceY);  
-                    xHit = x;  
-                    yHit = y;
+            wallX = math.floor(x + rr)
+            wallY = math.floor(y)
+                if map[wallY+1][wallX+1] > -1 then
+                    local distanceX = x - player.x
+                    local distanceY = y - player.y
+                    distance = math.sqrt(distanceX*distanceX + distanceY*distanceY)  
+                    xHit = x
+                    yHit = y
                     break;
                 end
-            x = x + dX; 
-            y = y + dY;
+            x = x + dX
+            y = y + dY
         end
 
         slope = 1/slope;
@@ -165,8 +165,8 @@ raycasterF = function()
         
         while x >= 0 and x < minimap.cellsAcross and y >= 0 and y < minimap.cellsDown do
             local yy = up and -1 or 0
-            wallY = math.floor(y + yy);
-            wallX = math.floor(x);
+            wallY = math.floor(y + yy)
+            wallX = math.floor(x)
             if map[wallY+1][wallX+1] > -1 then  
                 local distanceX = x - player.x;
                 local distanceY = y - player.y;
@@ -187,9 +187,9 @@ raycasterF = function()
 
     r.draw = function(rayX, rayY)
      
-        minimap.context.moveTo(minimap.cellWidth*player.x, minimap.cellHeight*player.y);
-        minimap.context.lineTo(rayX * minimap.cellWidth, rayY * minimap.cellHeight);
+        local alpha 
         draw.line(minimap.cellWidth*player.x, minimap.cellHeight*player.y, rayX * minimap.cellWidth, rayY * minimap.cellHeight, color.green )
+    end
 
     return r
 end
@@ -200,11 +200,15 @@ player = playerF()
 
 player.init()
 
+raycaster = raycasterF()
+
 
 
 drawAll = function()
     minimap.draw();
-    player.draw(); 
+    player.draw();
+    raycaster.castRays() 
+
 end
 
 
