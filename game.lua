@@ -79,8 +79,8 @@ minimapF = function()
     m = {}
     
       
-      m.width = 300;
-      m.height = 300;
+      m.width = 172;
+      m.height = 172;
       m.cellsAcross = #map[1]
       m.cellsDown = #map;
       m.cellWidth = m.width/m.cellsAcross;

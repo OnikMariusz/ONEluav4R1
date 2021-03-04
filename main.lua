@@ -247,9 +247,12 @@ while true do
 
     pointX = {}
     pointY = {}
+
+    maxDistance = 3
+    
     
     --r.CastRays(p)
-    for i = -14, 14 , 1 do 
+    for i = -45, 45 , 5 do 
     
     
     plusAngle = (p.directionAngle+i) %360
@@ -290,37 +293,64 @@ while true do
     hit = false
     distance = 0 
 
+    licznik = 0 
+
     while hit == false do
         
         if k>l then
+            distance = l
             ceilPosY = ceilPosY + stepY
                 if map.data[ceilPosY+1][ceilPosX+1] ~= 46 then 
+                   
+                    if distance > maxDistance then distance = maxDistance end 
                     hit = true
-                    distance = l
+                   
                     
                     
                 else
-                   
+                    
+                   if distance  >=maxDistance then 
+                    
+                        if distance > maxDistance then distance = maxDistance end 
+                            hit = true
+                   else
+
                     l = l + dl
+
+                   end
+                   
                     
                 end
         else
             ceilPosX = ceilPosX + stepX
+            distance = k 
             if map.data[ceilPosY+1][ceilPosX+1] ~= 46 then 
+                if distance > maxDistance then distance = maxDistance end 
                 hit = true
-                distance = k 
+               
+            
+                
                
             else
-                
-                k = k + dk
+               
+                if distance   >=maxDistance then 
+                    
+                    if distance  > maxDistance then distance = maxDistance end
+                    hit = true
+                else
+                    k = k + dk
+
+                end
+            
                 
             end
         end
+       -- licznik = licznik +1
 
     end
 
-    tx = p.x+ (math.cos(plusAngle) * (math.floor(distance *16) ))
-    ty = p.y + (math.sin(plusAngle) * (math.floor(distance*16) ))
+    tx = p.x+ (math.cos(plusAngle) * distance *16) 
+    ty = p.y + (math.sin(plusAngle) * distance*16) 
 
     table.insert(pointX, tx)
     table.insert(pointY, ty)

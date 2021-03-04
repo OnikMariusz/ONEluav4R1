@@ -60,4 +60,4 @@ end
 --x = radius + radius * sin(45);
 --y = radius + radius * cos(45);
 
-dofile("game.lua")
+dofile("main.lua")
