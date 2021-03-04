@@ -109,6 +109,80 @@ minimapF = function()
       
 end
 
+raycasterF = function()
+    init: function(){
+      var numberOfRays = 300;
+      var angleBetweenRays = .2 * Math.PI /180;
+      this.castRays = function() {
+        for (var i=0;i<numberOfRays;i++) {
+          var rayNumber = -numberOfRays/2 + i;
+          var rayAngle = angleBetweenRays * rayNumber + player.angle;
+          this.castRay(rayAngle);
+        }
+      }
+      this.castRay = function(rayAngle){
+        var twoPi = Math.PI * 2; 
+        rayAngle %= twoPi;
+        if (rayAngle < 0) rayAngle += twoPi;
+        var right = (rayAngle > twoPi * 0.75 || rayAngle < twoPi * 0.25);
+        var up = rayAngle > Math.PI;
+        var slope = Math.tan(rayAngle);
+        var distance = 0;
+        var xHit = 0;
+        var yHit = 0;
+        var wallX;  
+        var wallY;
+        var dX = right ? 1 : -1; 
+        var dY = dX * slope;  
+        var x = right ? Math.ceil(player.x) : Math.floor(player.x);
+        var y = player.y + (x - player.x) * slope; 
+        while (x >= 0 && x < minimap.cellsAcross && y >= 0 && y < minimap.cellsDown) {
+          wallX = Math.floor(x + (right ? 0 : -1));
+          wallY = Math.floor(y);
+          if (map[wallY][wallX] > -1) {
+            var distanceX = x - player.x;
+            var distanceY = y - player.y;
+            distance = Math.sqrt(distanceX*distanceX + distanceY*distanceY);  
+            xHit = x;  
+            yHit = y;
+            break;
+          }
+          x += dX; 
+          y += dY;
+        }
+        slope = 1/slope;
+        dY = up ? -1 : 1;
+        dX = dY * slope;
+        y = up ? Math.floor(player.y) : Math.ceil(player.y);
+        x = player.x + (y - player.y) * slope;
+        while (x >= 0 && x < minimap.cellsAcross && y >= 0 && y < minimap.cellsDown) {
+          wallY = Math.floor(y + (up ? -1 : 0));
+          wallX = Math.floor(x);
+          if (map[wallY][wallX] > -1) {
+            var distanceX = x - player.x;
+            var distanceY = y - player.y;
+            var blockDistance = Math.sqrt(distanceX*distanceX + distanceY*distanceY);
+            if (!distance || blockDistance < distance) {
+              distance = blockDistance;
+              xHit = x;
+              yHit = y;
+            }
+            break;
+          }
+          x += dX;
+          y += dY;
+        }
+        this.draw(xHit, yHit); 
+      };
+      this.draw = function(rayX, rayY){
+        minimap.context.beginPath();
+        minimap.context.moveTo(minimap.cellWidth*player.x, minimap.cellHeight*player.y);
+        minimap.context.lineTo(rayX * minimap.cellWidth, rayY * minimap.cellHeight);
+        minimap.context.closePath();
+        minimap.context.stroke();
+      }
+end
+
 
 minimap = minimapF()
 player = playerF()
