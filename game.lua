@@ -124,26 +124,32 @@ end
 
 
 
--- update = function()
---     if(jaws.pressed("left")) { player.direction = -1 };
---     if(jaws.pressed("right")) { player.direction = 1 };
---     if(jaws.pressed("up")) { player.speed = 1 };
---     if(jaws.pressed("down")) { player.speed = -1 }; 
+update = function()
+    if  buttons.left then  player.direction = -1 end
+    if  buttons.right then  player.direction = 1 end
+    if  buttons.up  then player.speed = 1 end
+    if  buttons.down then player.speed = -1 end 
 
---     if(jaws.on_keyup(["left", "right"], function(){
+    if buttons.released.left or buttons.released.righr then
+        player.direction = 0;
+    end
+    if buttons.released.up or buttons.released.down then
+        player.speed = 0
+    end
 --        player.direction = 0;
 --     })); 
 --     if(jaws.on_keyup(["up", "down"], function(){
 --        player.speed = 0;
 --     })); 
---     player.move();
--- end
+    player.move();
+end
 
 
 
 while true do
     buttons.read()
 
+    update()
     drawAll()
 
     screen.flip() 
