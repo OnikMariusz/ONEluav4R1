@@ -110,17 +110,19 @@ minimapF = function()
 end
 
 raycasterF = function()
-    init: function(){
-      var numberOfRays = 300;
-      var angleBetweenRays = .2 * Math.PI /180;
-      this.castRays = function() {
-        for (var i=0;i<numberOfRays;i++) {
-          var rayNumber = -numberOfRays/2 + i;
-          var rayAngle = angleBetweenRays * rayNumber + player.angle;
-          this.castRay(rayAngle);
-        }
-      }
-      this.castRay = function(rayAngle){
+    r = {}
+    local numberOfRays = 300;
+    local angleBetweenRays = 0.2 * math.pi /180;
+    
+    p.castRays = function() 
+        for  i=1, numberOfRays, 1 do
+            local rayNumber = -numberOfRays/2 + i;
+            local rayAngle = angleBetweenRays * rayNumber + player.angle;
+            p.castRay(rayAngle);
+        end
+    end
+      
+    this.castRay = function(rayAngle){
         var twoPi = Math.PI * 2; 
         rayAngle %= twoPi;
         if (rayAngle < 0) rayAngle += twoPi;
@@ -181,6 +183,7 @@ raycasterF = function()
         minimap.context.closePath();
         minimap.context.stroke();
       }
+    return r
 end
 
 
