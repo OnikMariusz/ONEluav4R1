@@ -130,17 +130,18 @@ update = function()
     if  buttons.up  then player.speed = 1 end
     if  buttons.down then player.speed = -1 end 
 
-    if buttons.released.left or buttons.released.righr then
+    if buttons.released.left then 
         player.direction = 0;
     end
-    if buttons.released.up or buttons.released.down then
+    if buttons.released.right then 
+        player.direction = 0;
+    end
+    if buttons.released.up then
         player.speed = 0
     end
---        player.direction = 0;
---     })); 
---     if(jaws.on_keyup(["up", "down"], function(){
---        player.speed = 0;
---     })); 
+    if buttons.released.down then
+        player.speed = 0
+    end      
     player.move();
 end
 
