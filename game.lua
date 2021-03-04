@@ -114,7 +114,7 @@ raycasterF = function()
     local numberOfRays = 300;
     local angleBetweenRays = 0.2 * math.pi /180;
     
-    p.castRays = function() 
+    r.castRays = function() 
         for  i=1, numberOfRays, 1 do
             local rayNumber = -numberOfRays/2 + i;
             local rayAngle = angleBetweenRays * rayNumber + player.angle;
@@ -122,67 +122,75 @@ raycasterF = function()
         end
     end
       
-    this.castRay = function(rayAngle){
-        var twoPi = Math.PI * 2; 
-        rayAngle %= twoPi;
-        if (rayAngle < 0) rayAngle += twoPi;
-        var right = (rayAngle > twoPi * 0.75 || rayAngle < twoPi * 0.25);
-        var up = rayAngle > Math.PI;
-        var slope = Math.tan(rayAngle);
-        var distance = 0;
-        var xHit = 0;
-        var yHit = 0;
-        var wallX;  
-        var wallY;
-        var dX = right ? 1 : -1; 
-        var dY = dX * slope;  
-        var x = right ? Math.ceil(player.x) : Math.floor(player.x);
-        var y = player.y + (x - player.x) * slope; 
-        while (x >= 0 && x < minimap.cellsAcross && y >= 0 && y < minimap.cellsDown) {
-          wallX = Math.floor(x + (right ? 0 : -1));
-          wallY = Math.floor(y);
-          if (map[wallY][wallX] > -1) {
-            var distanceX = x - player.x;
-            var distanceY = y - player.y;
-            distance = Math.sqrt(distanceX*distanceX + distanceY*distanceY);  
-            xHit = x;  
-            yHit = y;
-            break;
-          }
-          x += dX; 
-          y += dY;
-        }
+    r.castRay = function(rayAngle)
+        local woPi = math.pi * 2; 
+        rayAngle = rayAngle % twoPi;
+        if rayAngle < 0 then  rayAngle = rayAngle +  twoPi;
+        local right = (rayAngle > twoPi * 0.75 or rayAngle < twoPi * 0.25);
+        local up = rayAngle > math.pi;
+
+        local slope = math.tan(rayAngle);
+        local distance = 0;
+        local xHit = 0;
+        local yHit = 0;
+        local wallX;  
+        local wallY;
+        -- equivalent to var = cond ? a : b; var = cond and a or b ?: - https://pl.qaz.wiki/wiki/%3F:#Lua
+        local dX = right and 1 or -1; 
+        local dY = dX * slope;  
+        local x = right and  math.ceil(player.x) or math.floor(player.x)
+        local y = player.y + (x - player.x) * slope; 
+        
+        while  x >= 0 and  x < minimap.cellsAcross and y >= 0 and y < minimap.cellsDown do
+            local rr = right and 0 or -1
+            wallX = math.floor(x + rr);
+            wallY = Math.floor(y);
+                if map[wallY+1][wallX+1] > -1 
+                    local distanceX = x - player.x;
+                    local distanceY = y - player.y;
+                    distance = math.sqrt(distanceX*distanceX + distanceY*distanceY);  
+                    xHit = x;  
+                    yHit = y;
+                    break;
+                end
+            x = x + dX; 
+            y = y + dY;
+        end
+
         slope = 1/slope;
-        dY = up ? -1 : 1;
+        dY = up and  -1 or 1;
         dX = dY * slope;
-        y = up ? Math.floor(player.y) : Math.ceil(player.y);
+        y = up and  math.floor(player.y) or math.ceil(player.y);
         x = player.x + (y - player.y) * slope;
-        while (x >= 0 && x < minimap.cellsAcross && y >= 0 && y < minimap.cellsDown) {
-          wallY = Math.floor(y + (up ? -1 : 0));
-          wallX = Math.floor(x);
-          if (map[wallY][wallX] > -1) {
-            var distanceX = x - player.x;
-            var distanceY = y - player.y;
-            var blockDistance = Math.sqrt(distanceX*distanceX + distanceY*distanceY);
-            if (!distance || blockDistance < distance) {
-              distance = blockDistance;
-              xHit = x;
-              yHit = y;
-            }
+        
+        while x >= 0 and x < minimap.cellsAcross and y >= 0 and y < minimap.cellsDown do
+            local yy = up and -1 or 0
+            wallY = math.floor(y + yy);
+            wallX = math.floor(x);
+            if map[wallY+1][wallX+1] > -1 then  
+                local distanceX = x - player.x;
+                local distanceY = y - player.y;
+                local blockDistance = math.sqrt(distanceX*distanceX + distanceY*distanceY);
+                    if not distance or blockDistance < distance then
+                        distance = blockDistance;
+                        xHit = x;
+                        yHit = y;
+                    end
             break;
-          }
-          x += dX;
-          y += dY;
-        }
-        this.draw(xHit, yHit); 
-      };
-      this.draw = function(rayX, rayY){
-        minimap.context.beginPath();
+            end
+          x = x + dX;
+          y = y + dY;
+        end
+
+        r.draw(xHit, yHit); 
+    end
+
+    r.draw = function(rayX, rayY)
+     
         minimap.context.moveTo(minimap.cellWidth*player.x, minimap.cellHeight*player.y);
         minimap.context.lineTo(rayX * minimap.cellWidth, rayY * minimap.cellHeight);
-        minimap.context.closePath();
-        minimap.context.stroke();
-      }
+        draw.line(minimap.cellWidth*player.x, minimap.cellHeight*player.y, rayX * minimap.cellWidth, rayY * minimap.cellHeight, color.green )
+
     return r
 end
 
