@@ -1,7 +1,66 @@
 dofile("raycaster.lua")
+local DungeonModule = require("DungeonGenerator/Dungeon")
+local LevelModule = require("DungeonGenerator/Level")
+local FuncModule = require("DungeonGenerator/MainHelpFunc")
+
+
+
+
+  dungeon = Dungeon:new(1, 100, 100)
+  
+  -- generate with default settings
+  dungeon:generateDungeon()
+
+--local file = assert(io.open("DungeonGenerator/dungeon.txt", "r"))
+
+
+--newData = {}
+--n = 0
+--[[ for line in file:lines() do
+    n=n+1
+    local l = line
+  
+    
+       -- while line ~= "end" do
+       if string.find(line,"start") or string.find(line,"end")  then
+        
+            local tes = true
+
+       else
+        
+        
+            table.insert(newData, l)
+        
+        end
+
+        if string.find(line,"end") then 
+
+            file:close() 
+            break
+        end
+    
+        
+
+            
+        
+       -- end
+    
+end ]]
 os.cpu(333)
 --load colors
 color.loadpalette()
+
+
+function mapTilePice(_posX, _posY, _value)
+
+    local tile = {}
+    tile.x = _posX
+    tile.y = _posY
+    tile.val = _value
+
+    return tile
+
+end
 
 function DrawFieldOvView(tableX, tableY, _p, _color)
 
@@ -63,19 +122,39 @@ map.tileHeight = 16
 
 map.widthInTile = 30
 map.heightIntile = 17
-map.img = image.load("Tile2.png", map.tileWidth, map.tileHeight)
+map.img = image.load("16x16.png", map.tileWidth, map.tileHeight)
+
+map.visibleArray = {}
 
 
 
 map.draw = function()
 
-    for y = 1, #map.data, 1 do 
-        for x = 1, #map.data[1], 1 do
-           -- test = map.data[x][y] 
-            image.blitsprite(map.img, (x-1)*map.tileWidth, (y-1)*map.tileHeight, (map.data[y][x] -1))
-            
-        end
+    local mapLength = #map.visibleArray
+
+    for k,v in ipairs(map.visibleArray) do 
+        
+        
+        image.blitsprite(map.img, (map.visibleArray[k].x)*map.tileWidth, (map.visibleArray[k].y)*map.tileHeight, (map.data[map.visibleArray[k].y+1][map.visibleArray[k].x+1])-1)
+    
     end
+   --[[ for y = 1, #dungeon.levels[1].matrix, 1 do 
+        for x = 1, #dungeon.levels[1].matrix[1], 1 do
+           -- test = map.data[x][y] 
+            local numOfTile = nil
+
+            if dungeon.levels[1].matrix[y][x].class  == "#" then numOfTile = 60
+            --image.blitsprite(map.img, (x-1)*map.tileWidth, (y-1)*map.tileHeight, (map.data[y][x] -1))
+            
+            elseif dungeon.levels[1].matrix[y][x].class   == "." then numOfTile = 46
+                --image.blitsprite(map.img, (x-1)*map.tileWidth, (y-1)*map.tileHeight, (map.data[y][x] -1))
+                
+            else
+                numOfTile = 74
+            end
+            image.blitsprite(map.img, (x-1)*map.tileWidth, (y-1)*map.tileHeight, numOfTile)
+        end
+    end  ]]
 end
 
 
@@ -97,7 +176,8 @@ function player(_x,_y, _color, _img)
     o.halfHeight = o.height/2
     o.circleSections = 60
     o.rotationSpeed = 90
-    o.img = image.load(_img)
+    o.img = image.load(_img, 16,16)
+    o.curentFrame = 1
 
     o.CheckColision = function(_x, _y, _colisionTileIndex)
 
@@ -124,6 +204,7 @@ function player(_x,_y, _color, _img)
     --x = radius + radius * sin(45);
     --y = radius + radius * cos(45);
     o.Draw = function()
+        
         --draw.rect(o.x, o.y, o.width,o.height, o.color )
         -- local x2 = o.x + o.width
         -- local y2 = o.y + o.height
@@ -160,10 +241,14 @@ function player(_x,_y, _color, _img)
             o.x = o.x + (o.speedX * math.cos(math.rad(o.directionAngle)))
             o.y = o.y + (o.speedY * math.sin(math.rad(o.directionAngle)))
         --end 
+        o.curentFrame = o.curentFrame + 1
             
-
+        o.curentFrame = o.curentFrame %11
         
-        image.blit(o.img, o.x, o.y)
+        image.blitsprite(o.img, o.x, o.y, o.curentFrame)
+        
+	
+        --image.blit(o.img, o.x, o.y)
         --draw.line(o.x , o.y , xx, yy, color.red)
     end
     return o
@@ -173,10 +258,10 @@ end
 --initialization 
 
 --image
-p = player(5*16+8, 5*16+8,color.red, "player.png")
-image.center(p.img)
+p = player(5*16+8, 5*16+8,color.red, "soldierx16x16.png")
+image.center(p.img,8,8)
 map.img = image.load("16x16.png", map.tileWidth, map.tileHeight)
-r = Raycaster(p)
+--r = Raycaster(p)
 
 --rr = Raycaster(p);
 
@@ -184,8 +269,7 @@ r = Raycaster(p)
 while true do
     buttons.read()
 
-    
-
+   
      
 
 
@@ -214,10 +298,12 @@ while true do
     if buttons.left then 
         --p.x  = p.x -16 
         p.directionAngle = p.directionAngle-90
+        image.rotate(p.img, p.directionAngle-90)	
     end
     if buttons.right then 
        -- p.x  = p.x + 16 
         p.directionAngle = p.directionAngle + 90
+        image.rotate(p.img, p.directionAngle-90)
     end
 
     
@@ -242,17 +328,18 @@ while true do
     --local playerTilePositionY = math.floor(p.y / map.tileHeight)
  
 
-    map.draw()
-    p.Draw()
+   
+    
 
     pointX = {}
     pointY = {}
 
-    maxDistance = 3
+    maxDistance = 4
+    for k,v in ipairs(map.visibleArray) do map.visibleArray[k]=nil end
     
     
     --r.CastRays(p)
-    for i = -45, 45 , 5 do 
+    for i = -60, 60 , 6 do 
     
     
     plusAngle = (p.directionAngle+i) %360
@@ -289,6 +376,12 @@ while true do
 
     ceilPosX = math.floor(p.x/16)
     ceilPosY = math.floor(p.y/16)
+    local startTile = mapTilePice(ceilPosX, ceilPosY, map.data[ceilPosY+1][ceilPosX+1])
+    table.insert(map.visibleArray, startTile)
+
+    
+    
+    
 
     hit = false
     distance = 0 
@@ -300,6 +393,8 @@ while true do
         if k>l then
             distance = l
             ceilPosY = ceilPosY + stepY
+            local newVisibleTile = mapTilePice(ceilPosX, ceilPosY, map.data[ceilPosY+1][ceilPosX+1])
+            table.insert(map.visibleArray, newVisibleTile)
                 if map.data[ceilPosY+1][ceilPosX+1] ~= 46 then 
                    
                     if distance > maxDistance then distance = maxDistance end 
@@ -324,6 +419,8 @@ while true do
         else
             ceilPosX = ceilPosX + stepX
             distance = k 
+            local newVisibleTile = mapTilePice(ceilPosX, ceilPosY, map.data[ceilPosY+1][ceilPosX+1])
+            table.insert(map.visibleArray, newVisibleTile)
             if map.data[ceilPosY+1][ceilPosX+1] ~= 46 then 
                 if distance > maxDistance then distance = maxDistance end 
                 hit = true
@@ -358,11 +455,10 @@ while true do
 
     end
 
-    alpha = color.new(0,255,0, 50)
     
-            --screen.print(400,2*10,"pointY"..pointX[1],0.8)
 
-            DrawFieldOvView(pointX, pointY, p, alpha)
+
+           
             --draw.filltriangle(p.x, p.y, pointX[20], pointY[20], pointX[19], pointY[19], alpha)
     
     
@@ -565,9 +661,15 @@ while true do
     --screen.print(5,175,"r.distance = "..r.distance,0.3)
 
 
-   -- screen.print(5,20,"player speedX : "..p.speedX,0.5)
+   --screen.print(5,20,""..newData[1],0.5)
    --local modX = p.x% map.tileWidth
   
+  map.draw()
+   p.Draw()
+   alpha = color.new(0,255,0, 50)
+   
+
+    DrawFieldOvView(pointX, pointY, p, alpha)
    
     screen.flip() 
 end
